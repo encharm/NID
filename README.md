@@ -1,4 +1,4 @@
-Note: this is preliminary (version 0.0.1)
+Note: this is preliminary (version 0.0.1) and will undergo serious changes, breaking in format etc. Open issues for suggestions, bug reports etc.
 
 ## Native Interface Definition
 
@@ -17,13 +17,13 @@ This software provides a parser component written in Node.JS which parses `.nid`
 
 As executable:
 ```
-# npm install -g nid
+# npm install -g nid-parser
 # nid input.nid
 ```
 
 As dependency:
 ```
-# npm install --save nid
+# npm install --save nid-parser
 ```
 ```js
 var nid = require('nid');
