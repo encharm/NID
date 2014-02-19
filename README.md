@@ -17,17 +17,17 @@ This software provides a parser component written in Node.JS which parses `.nid`
 
 As executable:
 ```
-# npm install -g NID
+# npm install -g nid
 # nid input.nid
 ```
 
 As dependency:
 ```
-# npm install --save NID
+# npm install --save nid
 ```
 ```js
-var NID = require('NID');
-NID.parse(fs.readFileSync('sample.nid').toString('utf8'));
+var nid = require('nid');
+nid.parse(fs.readFileSync('sample.nid').toString('utf8'));
 ```
 
 
