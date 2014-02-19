@@ -1,0 +1,457 @@
+{
+  var extend = require('extend');
+
+  function sortWithConst(a, b){
+    var wordToBeLast = 'const'; 
+
+    if(a === wordToBeLast) {
+        return -1;
+    } else if(b===wordToBeLast){
+        return 1;
+    } else {
+        return a > b; 
+    }
+  }
+  var enumeratorValue = 0;
+}
+
+
+// much based on: http://www.externsoft.ch/media/swf/cpp11-iso.html#trailing_type_specifier
+
+start = declarations:declaration_seq? {
+  return {declarations: declarations || []};
+}
+
+declaration_seq = declaration_seq:(_ declaration:declaration _ {return declaration;})+ { return declaration_seq.filter(function(elem) {
+  return !!elem;
+}); }
+
+declaration_seq = declaration_seq:(_ declaration:declaration _ {return declaration;})+ { return declaration_seq.filter(function(elem) {
+  return !!elem;
+}); }
+
+
+empty_declaration = ';' {return null;}
+
+declaration = class_declaration
+              / function_declaration
+              / namespace_definition
+              / enum_specifier
+              / control_line
+              / include
+              / empty_declaration
+
+//opaque_enum_declaration = enum_key _ attribute_specifier_seq? _ identifier _ enum_base
+
+enumerator = identifier:identifier {
+  
+  return identifier;
+}
+enumerator_definition = enumerator:enumerator value:(_ '=' _ value:constant_expression {return value;})? {
+  if(value)
+    enumeratorValue = parseInt(value);
+
+  return {
+    name: enumerator,
+    value: enumeratorValue++
+  };
+}
+
+enumerator_list = first:enumerator_definition _ list:(',' _ definition:enumerator_definition {return definition;})* {
+  list.unshift(first);
+  return list;
+}
+
+enum_specifier = !{enumeratorValue = 0;} head:enum_head _ '{' _ enumerator_list:enumerator_list? _ '}' {
+  return {
+    enum: extend({
+      values: enumerator_list || []
+    }, head)
+  };
+}
+
+enum_key = 'enum' _ 'class' {return {'class': true}}/ 'enum' _ 'struct' {return {'class': true}} / 'enum' {return {}}
+
+enum_head = key:enum_key _ attributes:attribute_specifier_seq? _ name:identifier? {
+  return extend({
+    attributes: attributes || {},
+    name: name || undefined
+  }, key);
+};
+
+
+constructor = declarator:declarator {
+  return {
+    constructor: declarator
+  };
+}
+
+member_declaration =  declaration /constructor
+
+member_declaration_seq = member_declaration_seq:(_ member_declaration:member_declaration _ {return member_declaration;})+ { return member_declaration_seq.filter(function(elem) {
+  return !!elem;
+}); }
+
+
+include = '#' _ 'include' _ include:('<' chars:[^<>\n]+ '>' {return '<' + chars.join('') + '>';}
+                           / '"' chars:[^<>\n]+ '"' {return '"' + chars.join('') + '"';}
+  ) {
+  return {pragma: '#include ' + include};
+}
+              
+
+namespace_definition = 'namespace' _ name:identifier _ '{' _ declarations:namespace_body _ '}' {
+  return {'namespace': {
+    name: name,
+    declarations: declarations || [],
+  }};
+}
+namespace_body = declaration_seq?
+
+class_body = member_declaration_seq?
+
+class_declaration = type:class_key _ name:class_name _ '{' _ declaration_seq:class_body _ '}' {
+  var out = {};
+  out[type] = {
+    name: name,
+    declarations: declaration_seq || []
+  };
+  return out;
+}
+
+  
+
+type_declaration =  
+                type:(
+                type:(decl1:decl_specifier _ decl2:decl_specifier _ decl3:decl_specifier _ decl4:decl_specifier {
+                      return [decl1, decl2, decl3, decl4].sort(sortWithConst).join(" ");
+                  } ) _ declarator:declarator {return extend({type: type}, declarator);}
+                /
+                type:(decl1:decl_specifier _ decl2:decl_specifier _ decl3:decl_specifier {
+                      return [decl1, decl2, decl3].sort(sortWithConst).join(" ");
+                  } ) _ declarator:declarator {return extend({type: type}, declarator);}
+                /
+                type:(decl1:decl_specifier _ decl2:decl_specifier  {
+                      return [decl1, decl2].sort(sortWithConst).join(" ");
+                  } ) _ declarator:declarator {return extend({type: type}, declarator);}
+                /
+                type:(decl1:decl_specifier {
+                      return [decl1].sort(sortWithConst).join(" ");
+                  } ) _ declarator:declarator {return extend({type: type}, declarator);}
+                ) {
+                  return type;};
+
+                
+
+
+function_declaration =  attributes:attribute_specifier_seq? _ type_declaration:type_declaration  _ ';' {
+  if(type_declaration.parameters && !type_declaration.pointer) {
+    return {
+      function: extend(type_declaration, {attributes: attributes})
+    }
+  }
+  else {
+    return {
+      variable: extend(type_declaration, {attributes: attributes})
+    }
+  }
+  
+}
+
+balanced_token = '(' balanced_token_seq ')' /
+                  '[' balanced_token_seq ']' /
+                  '{' balanced_token_seq '}' /
+                  [^()\[\]{}]
+balanced_token_seq = tokens:balanced_token+ {return tokens.join("");}
+attribute_argument_clause = '(' _ argument:balanced_token_seq _')' {return argument};
+attribute_namespace = identifier
+attribute_scoped_token = namespace:attribute_namespace _ '::' _ identifier:identifier {
+  return namespace + '::' + identifier;
+}
+attribute_token = identifier / attribute_scoped_token
+attribute = attribute:attribute_token _ argument:attribute_argument_clause? {return {name: attribute, argument: argument};}
+attribute_list = attribute:attribute _ attributes:(',' _ attribute:attribute _ {return attribute;})* dots:'...'? 
+{
+  attributes.unshift(attribute);
+  attributes.dots = dots;
+  return attributes;
+}
+attribute_specifier = '[' _ '[' _ attribute_list:attribute_list? _ ']' _ ']' {return attribute_list;}
+attribute_specifier_seq = attributes:(attribute:attribute_specifier _ {return attribute})* {
+  var a = [];
+  a = a.concat.apply(a, attributes)
+
+  var out = {};
+  a.forEach(function(attr) {
+    out[attr.name] =  attr.argument || true;
+  });
+  return out;
+}
+
+
+// number literals
+unsigned_suffix = 'u' / 'U'
+long_suffix = 'l' / 'L'
+long_long_suffix = 'll' / 'LL'
+integer_suffix = unsigned_suffix _ long_suffix? /
+                  unsigned_suffix _ long_long_suffix? /
+                  long_suffix _ unsigned_suffix? /
+                  long_long_suffix unsigned_suffix?
+
+integer_literal = hexadecimal_literal integer_suffix? /
+                  decimal_literal integer_suffix? / 
+                  octal_literal integer_suffix?
+                  
+decimal_literal = first:[1-9] digits:[0-9]* {return parseInt(first+digits.join(""), 10)}
+octal_literal = first:[0] digits:[0-7]* {return parseInt(digits.join(""), 8)}
+hexadecimal_literal = ('0x' / '0X') digits:[0-9a-fA-F]+ {return parseInt(digits.join(""), 16)}
+
+
+initializer_clause = 
+
+operator = '+' /
+           '-' /
+           '*' /
+           '/' /
+           '%' /
+           '^' /
+           '&' /
+           '|' /
+           '~' /
+           '!' /
+           '=' /
+           '<' /
+           '>' /
+           '+=' /
+           '-=' /
+           '*=' /
+           '/=' /
+           '%=' /
+           '^=' /
+           '&=' /
+           '|=' /
+           '<<' /
+           '>>' /
+           '>>=' /
+           '<<=' /
+           '==' /
+           '!=' /
+           '<=' /
+           '>=' /
+           '&&' /
+           '||' /
+           '++' /
+           '--' /
+           ',' /
+           '->*' /
+           '->' /
+           '()' /
+           '[]'
+
+operator_function_id = 'operator' _ operator
+
+conversion_function_id = 'operator' _ ptr_declarator+
+
+literal_operator_id = 'operator' _ '""' _ identifier
+
+abstract_declarator= // todo
+
+type_id = type:type_specifier+ abstract_declarator? {
+  return type.join(" ");
+}
+
+template_argument = constant_expression /
+                    type_id /
+                    id_expression
+
+template_argument_list = first:template_argument _ args:(',' arg:template_argument _ {return arg;})* {
+  args.unshift(first);
+  return args.join(',');
+}
+
+template_name = identifier
+
+simple_template_id = name:template_name _ '<' _ arguments:template_argument_list _ '>' 
+                    {return name + '<' + arguments + '>';}
+
+template_id = simple_template_id
+
+unqualified_id = template_id /
+                 identifier /
+                 operator_function_id /
+                 conversion_function_id /
+                 literal_operator_id
+
+
+
+qualified_id =  '::'? _ nested_name_specifier _ unqualified_id /
+              '::' _ identifier:identifier {return '::' + identifier;}
+
+id_expression = unqualified_id /
+                qualified_id
+
+class_name = identifier /
+             simple_template_id
+
+declarator_id = id_expression /
+                '::'? _ nested_name_specifier _ class_name
+
+constant_expression = integer_literal // originally conditional_expression
+
+noptr_declarator_tail = parameters:parameters_and_qualifiers? {return {parameters: parameters || undefined}}/ 
+                        '[' _ constant_expression? _ ']' _ attribute_specifier_seq?
+
+noptr_declarator_head = declarator_id:declarator_id _ attributes:attribute_specifier_seq? tail:noptr_declarator_tail? {
+    return extend({
+      name: declarator_id,
+      attributes: attributes
+    }, tail);
+
+  } /
+  '(' _ ptr_declarator:ptr_declarator _ ')' {return ptr_declarator;}
+
+
+noptr_declarator = head:noptr_declarator_head _ parameters:parameters_and_qualifiers {
+                      return extend(head, {
+                        parameters:parameters,
+                        'function': true
+                      });
+                    }/
+                    noptr_declarator_head _ '[' _ integer_literal _ ']' _ attribute_specifier_seq? /
+                    noptr_declarator_head
+
+cv_qualifier_seq = qualifiers:(cv_qualifier:cv_qualifier _ {return cv_qualifier;})+ {return qualifiers.sort(sortWithConst).join(" ");}
+
+ptr_operator = '*' _ attributes:attribute_specifier_seq? _ cv_qualifier:cv_qualifier_seq? {
+  return {
+    pointer: '*',
+    qualifier: cv_qualifier || undefined,
+    attributes: attributes
+  };
+}
+
+ptr_declarator = noptr_declarator / 
+                  ptr_operator:ptr_operator _ ptr_declarator:ptr_declarator {
+
+                    var out = extend({}, ptr_operator, ptr_declarator);
+                    if(ptr_declarator.pointer)
+                      out.pointer = ptr_declarator.pointer + ptr_operator.pointer;
+                    return out;
+                  }
+
+trailing_type_specifier_seq = trailing_type_specifier _ attribute_specifier_seq? /
+                              trailing_type_specifier _ trailing_type_specifier_seq
+
+trailing_return_type = '->' _ trailing_type_specifier_seq
+
+declarator = ptr_declarator /
+              noptr_declarator _ parameters_and_qualifiers _ trailing_return_type
+
+parameter_declaration =  attributes:attribute_specifier_seq? _ type_declaration:type_declaration ('=' _ initializer_clause)?
+                          {
+                            return extend(type_declaration, {
+                              attributes: attributes
+                            });
+                          }
+
+parameter_declaration_list = front_parameter:parameter_declaration
+                              tail_parameters:( _ ',' _ parameter:parameter_declaration {return parameter;})*
+                              {
+                                tail_parameters.unshift(front_parameter);
+                                return tail_parameters;
+                              }
+
+
+parameter_declaration_clause = parameters:parameter_declaration_list _ (',' _ '...')? {
+  // TODO vararg
+  return parameters;
+}
+
+ref_qualifier = // todo
+exception_specification = // todo
+parameters_and_qualifiers = '(' _ parameters:parameter_declaration_clause? _ ')' attribute_specifier_seq? cv_qualifier_seq? ref_qualifier? exception_specification?
+
+{
+  return parameters || [];
+}
+
+
+storage_class_specifier = 'register' / 'static' / 'thread_local' / 'extern' / 'mutable'
+
+function_specifier = 'inline' / 'virtual' / 'explicit'
+
+decl_specifier = storage_class_specifier /
+                 type_specifier /
+                 function_specifier /
+                 'friend' /
+                 'typedef' /
+                 'constexpr'
+
+simple_type_specifier = 'char' /
+                        'char16_t' /
+                        'char32_t' /
+                        'wchar_t' /
+                        'bool' /
+                        'short' /
+                        'int' /
+                        'long' /
+                        'signed' /
+                        'unsigned' /
+                        'float' /
+                        'double' /
+                        'void' /
+                        'auto' /
+                    front:'::'? _ nested:nested_name_specifier? _ type:type_name {return (front ? front : '') + nested + type;}
+                        //'::'? _ nested_name_specifier? _ simple_template_id /
+                        
+// below should allow constant_expression
+
+type_specifier =  trailing_type_specifier
+//                  class_specifier /
+//                  enum_specifier
+
+cv_qualifier = 'const' / 'volatile'
+
+trailing_type_specifier = simple_type_specifier /
+//                          elaborated_type_specifier /
+//                          typename_specifier /
+                          cv_qualifier
+
+namespace_name = identifier
+
+enum_name = identifier
+typedef_name = identifier
+class_name = identifier
+
+type_name = simple_template_id /
+            class_name /
+            enum_name /
+            typedef_name
+            
+
+nested_name_specifier = parts:(part:(type_name / namespace_name) _ '::' {return part + '::';})* {return parts.join("");}
+                        
+
+//typename_specifier = nested_name_specifier:nested_name_specifier _ identifier:identifier {return nested_name_specifier + identifier;}
+
+digit = [0-9]
+nondigit = [a-zA-Z_]
+
+digit_or_nondigit = digit / nondigit
+
+class_key = 'class' / 'struct' / 'union'
+
+control_line = '#pragma' _ chars:notnl* eol? { return {pragma: chars.join("")};}
+
+identifier = first:nondigit chars:digit_or_nondigit* {
+  return first + chars.join("");
+}
+
+any = .
+_ = [\t\n\r ]* {;}
+__ = [\t\n\r ]+ {;}
+___ = chars:[\t\n\r ]+ {return chars.join("");}
+_notnl = [ \t]* {;}
+
+notnl = [^\n]
+eol = [\n] {;}

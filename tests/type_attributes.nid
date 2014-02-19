@@ -1,0 +1,7 @@
+#include <stdio.h>
+
+[[handle,free(fclose)]] FILE* fopen(const char* filename, const char* mode);
+
+ size_t fread([[cast(char*)]] void* ptr, size_t size, size_t nmemb, [[handle]] FILE* stream);
+
+[[destructor]] int fclose(FILE* f);

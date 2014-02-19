@@ -1,0 +1,8 @@
+
+#include <stdio.h>
+
+FILE* stdin;
+FILE* stdout;
+
+int some_random_integer;
+

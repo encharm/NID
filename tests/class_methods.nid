@@ -1,0 +1,21 @@
+
+
+class Rect {
+
+  Rect(int x, int y, int w, int h);
+
+  [[get(x)]] int x();
+  [[set(x)]] void setX(int x);
+  [[get(y)]] int y();
+  [[set(y)]] void setY(int y);
+
+  [[get(width)]] int width();
+  [[set(width)]] void setWidth(int width);
+  
+  [[get(height)]] int height();
+  [[set(height)]] void setHeight(int height);
+
+  int area();
+
+  static int sharedArea(Rect a, Rect b);
+};
