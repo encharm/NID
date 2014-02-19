@@ -13,6 +13,24 @@ This software provides a parser component written in Node.JS which parses `.nid`
 * Function and variable declarations are parsed.
 * C++11 attributes are shown in JSON and can be used to improve the bindings.
 
+### Usage
+
+As executable:
+```
+# npm install -g NID
+# nid input.nid
+```
+
+As dependency:
+```
+# npm install --save NID
+```
+```js
+var NID = require('NID');
+NID.parse(fs.readFileSync('sample.nid').toString('utf8'));
+```
+
+
 ### Example (taken from tests)
 ```c++
 #include <stdio.h>
