@@ -1,0 +1,8 @@
+{ declarations: 
+   [ { enum: 
+        { values: 
+           [ { name: 'FIRST', value: 0 },
+             { name: 'SECOND', value: 5 },
+             { name: 'THIRD', value: 6 },
+             { name: '__END', value: 20 } ],
+          attributes: {} } } ] }

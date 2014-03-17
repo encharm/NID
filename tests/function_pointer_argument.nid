@@ -1,0 +1,2 @@
+// function pointer as argument
+int set_callback(int (*callback)(int a, int b));

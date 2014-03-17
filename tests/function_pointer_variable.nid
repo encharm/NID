@@ -1,0 +1,3 @@
+// function pointer variable
+int (*some_callback)(int a, int b);
+

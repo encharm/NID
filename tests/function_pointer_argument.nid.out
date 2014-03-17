@@ -1,0 +1,14 @@
+{ declarations: 
+   [ { function: 
+        { type: { name: 'int' },
+          name: 'set_callback',
+          attributes: {},
+          parameters: 
+           [ { type: 
+                { name: 'int',
+                  parameters: 
+                   [ { type: { name: 'int' }, name: 'a', attributes: {} },
+                     { type: { name: 'int' }, name: 'b', attributes: {} } ],
+                  functionPointer: true },
+               attributes: {},
+               name: 'callback' } ] } } ] }

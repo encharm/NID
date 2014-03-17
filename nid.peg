@@ -13,12 +13,27 @@
     }
   }
   var enumeratorValue = 0;
+
+  function fixParameter(parameter) {
+    if(parameter.parameters) {
+      parameter.type.parameters = parameter.parameters;
+      delete parameter.parameters;
+    }
+    if(parameter.type.parameters) {
+
+      // FIXME: remove this?
+
+      parameter.type.functionPointer = true;
+    }
+    delete parameter.ptrHint;
+  }
+
 }
 
 
 // much based on: http://www.externsoft.ch/media/swf/cpp11-iso.html#trailing_type_specifier
 
-start = declarations:declaration_seq? {
+start = declarations:declaration_seq? _ {
   return {declarations: declarations || []};
 }
 
@@ -82,7 +97,7 @@ enum_head = key:enum_key _ attributes:attribute_specifier_seq? _ name:identifier
 
 constructor = declarator:declarator {
   return {
-    constructor: declarator
+    _constructor: declarator
   };
 }
 
@@ -119,40 +134,48 @@ class_declaration = type:class_key _ name:class_name _ '{' _ declaration_seq:cla
   return out;
 }
 
-  
-
 type_declaration =  
                 type:(
                 type:(decl1:decl_specifier _ decl2:decl_specifier _ decl3:decl_specifier _ decl4:decl_specifier {
                       return [decl1, decl2, decl3, decl4].sort(sortWithConst).join(" ");
-                  } ) _ declarator:declarator {return extend({type: type}, declarator);}
+                  } ) _ declarator:declarator {return extend(true, {type: {name: type} }, declarator);}
                 /
                 type:(decl1:decl_specifier _ decl2:decl_specifier _ decl3:decl_specifier {
                       return [decl1, decl2, decl3].sort(sortWithConst).join(" ");
-                  } ) _ declarator:declarator {return extend({type: type}, declarator);}
+                  } ) _ declarator:declarator {return extend(true, {type: {name: type}}, declarator);}
                 /
                 type:(decl1:decl_specifier _ decl2:decl_specifier  {
                       return [decl1, decl2].sort(sortWithConst).join(" ");
-                  } ) _ declarator:declarator {return extend({type: type}, declarator);}
+                  } ) _ declarator:declarator {return extend(true, {type: {name: type}}, declarator);}
                 /
                 type:(decl1:decl_specifier {
                       return [decl1].sort(sortWithConst).join(" ");
-                  } ) _ declarator:declarator {return extend({type: type}, declarator);}
+                  } ) _ declarator:declarator {return extend(true, {type: {name: type}}, declarator);}
                 ) {
-                  return type;};
+                  if(type.pointer) {
+                    type.type.pointer = type.pointer;
+                  delete type.pointer;
+                  }
+                  if(type.type.parameters) {
+                     type.type.functionPointer = true;
+                  }
+                  return type;
+                };
 
                 
 
 
 function_declaration =  attributes:attribute_specifier_seq? _ type_declaration:type_declaration  _ ';' {
-  if(type_declaration.parameters && !type_declaration.pointer) {
+  if(!type_declaration.functionPointer && type_declaration.parameters && !type_declaration.ptrHint) {
+    delete type_declaration.ptrHint; // do not bloat the output
     return {
-      function: extend(type_declaration, {attributes: attributes})
+      function: extend(true, type_declaration, {attributes: attributes})
     }
   }
   else {
+    delete type_declaration.ptrHint; // do not bloat the output
     return {
-      variable: extend(type_declaration, {attributes: attributes})
+      variable: extend(true, type_declaration, {attributes: attributes})
     }
   }
   
@@ -298,23 +321,38 @@ declarator_id = id_expression /
 
 constant_expression = integer_literal // originally conditional_expression
 
-noptr_declarator_tail = parameters:parameters_and_qualifiers? {return {parameters: parameters || undefined}}/ 
-                        '[' _ constant_expression? _ ']' _ attribute_specifier_seq?
+noptr_declarator_tail = parameters:parameters_and_qualifiers? {return parameters;}/ 
+                        '[' _ constant_expression? _ ']' _ attribute_specifier_seq? 
 
-noptr_declarator_head = declarator_id:declarator_id _ attributes:attribute_specifier_seq? tail:noptr_declarator_tail? {
-    return extend({
+noptr_declarator_head = declarator_id:declarator_id _ attributes:attribute_specifier_seq? _ tail:noptr_declarator_tail? {
+    return extend(true, {
       name: declarator_id,
       attributes: attributes
     }, tail);
 
   } /
-  '(' _ ptr_declarator:ptr_declarator _ ')' {return ptr_declarator;}
+  '(' _ ptr_declarator:ptr_declarator _ ')' {
+    delete ptr_declarator.pointer;
+    if(ptr_declarator.ptrHint) {
+      ptr_declarator.ptrHint++;
+    }
+    else {
+      ptr_declarator.ptrHint = 1;
+    }
+    return extend(ptr_declarator);
+  }
 
 
 noptr_declarator = head:noptr_declarator_head _ parameters:parameters_and_qualifiers {
-                      return extend(head, {
-                        parameters:parameters,
-                        'function': true
+                      // handle this ambiguity of returning function pointers...
+
+                      if(head.parameters) {
+                        parameters = {type: parameters};
+                        head.ptrHint--;
+                      }
+
+                      return extend(true, head, parameters, {
+                        //'function': head.ptrHint
                       });
                     }/
                     noptr_declarator_head _ '[' _ integer_literal _ ']' _ attribute_specifier_seq? /
@@ -333,9 +371,9 @@ ptr_operator = '*' _ attributes:attribute_specifier_seq? _ cv_qualifier:cv_quali
 ptr_declarator = noptr_declarator / 
                   ptr_operator:ptr_operator _ ptr_declarator:ptr_declarator {
 
-                    var out = extend({}, ptr_operator, ptr_declarator);
-                    if(ptr_declarator.pointer)
-                      out.pointer = ptr_declarator.pointer + ptr_operator.pointer;
+                    var out = extend(true, {}, ptr_operator, ptr_declarator);
+//                    if(ptr_declarator.pointer)
+//                      out.pointer = ptr_declarator.pointer + ptr_operator.pointer;
                     return out;
                   }
 
@@ -349,14 +387,20 @@ declarator = ptr_declarator /
 
 parameter_declaration =  attributes:attribute_specifier_seq? _ type_declaration:type_declaration ('=' _ initializer_clause)?
                           {
-                            return extend(type_declaration, {
+                            return extend(true, type_declaration, {
                               attributes: attributes
                             });
                           }
 
 parameter_declaration_list = front_parameter:parameter_declaration
-                              tail_parameters:( _ ',' _ parameter:parameter_declaration {return parameter;})*
+                              tail_parameters:( _ ',' _ parameter:parameter_declaration {
+
+                                  fixParameter(parameter);
+
+                                  return parameter;
+                                })*
                               {
+                                fixParameter(front_parameter);
                                 tail_parameters.unshift(front_parameter);
                                 return tail_parameters;
                               }
@@ -369,10 +413,13 @@ parameter_declaration_clause = parameters:parameter_declaration_list _ (',' _ '.
 
 ref_qualifier = // todo
 exception_specification = // todo
-parameters_and_qualifiers = '(' _ parameters:parameter_declaration_clause? _ ')' attribute_specifier_seq? cv_qualifier_seq? ref_qualifier? exception_specification?
+parameters_and_qualifiers = '(' _ parameters:parameter_declaration_clause? _ ')' attributes:attribute_specifier_seq? cv_qualifier_seq? ref_qualifier? exception_specification?
 
 {
-  return parameters || [];
+  return {
+    parameters: parameters || [],
+    attributes: attributes
+  };
 }
 
 
@@ -402,7 +449,6 @@ simple_type_specifier = 'char' /
                         'void' /
                         'auto' /
                     front:'::'? _ nested:nested_name_specifier? _ type:type_name {return (front ? front : '') + nested + type;}
-                        //'::'? _ nested_name_specifier? _ simple_template_id /
                         
 // below should allow constant_expression
 
@@ -420,38 +466,44 @@ trailing_type_specifier = simple_type_specifier /
 namespace_name = identifier
 
 enum_name = identifier
+
 typedef_name = identifier
+
 class_name = identifier
 
 type_name = simple_template_id /
             class_name /
             enum_name /
-            typedef_name
-            
+            typedef_name            
 
 nested_name_specifier = parts:(part:(type_name / namespace_name) _ '::' {return part + '::';})* {return parts.join("");}
                         
-
-//typename_specifier = nested_name_specifier:nested_name_specifier _ identifier:identifier {return nested_name_specifier + identifier;}
-
 digit = [0-9]
+
 nondigit = [a-zA-Z_]
 
 digit_or_nondigit = digit / nondigit
 
 class_key = 'class' / 'struct' / 'union'
 
-control_line = '#pragma' _ chars:notnl* eol? { return {pragma: chars.join("")};}
+control_line = '#pragma' _ chars:notnl* eol? {
+  return {pragma: chars.join("")};
+}
 
 identifier = first:nondigit chars:digit_or_nondigit* {
   return first + chars.join("");
 }
 
 any = .
+
 _ = [\t\n\r ]* {;}
+
 __ = [\t\n\r ]+ {;}
+
 ___ = chars:[\t\n\r ]+ {return chars.join("");}
+
 _notnl = [ \t]* {;}
 
 notnl = [^\n]
+
 eol = [\n] {;}

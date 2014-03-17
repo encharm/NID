@@ -1,0 +1,14 @@
+{ declarations: 
+   [ { pragma: '#include <stdio.h>' },
+     { variable: 
+        { type: { name: 'FILE', pointer: '*' },
+          attributes: {},
+          name: 'stdin' } },
+     { variable: 
+        { type: { name: 'FILE', pointer: '*' },
+          attributes: {},
+          name: 'stdout' } },
+     { variable: 
+        { type: { name: 'int' },
+          name: 'some_random_integer',
+          attributes: {} } } ] }

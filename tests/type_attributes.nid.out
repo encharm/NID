@@ -1,0 +1,34 @@
+{ declarations: 
+   [ { pragma: '#include <stdio.h>' },
+     { function: 
+        { type: { name: 'FILE', pointer: '*' },
+          attributes: { handle: true, free: 'fclose' },
+          name: 'fopen',
+          parameters: 
+           [ { type: { name: 'const char', pointer: '*' },
+               attributes: {},
+               name: 'filename' },
+             { type: { name: 'const char', pointer: '*' },
+               attributes: {},
+               name: 'mode' } ] } },
+     { function: 
+        { type: { name: 'size_t' },
+          name: 'fread',
+          attributes: {},
+          parameters: 
+           [ { type: { name: 'void', pointer: '*' },
+               attributes: { cast: 'char*' },
+               name: 'ptr' },
+             { type: { name: 'size_t' }, name: 'size', attributes: {} },
+             { type: { name: 'size_t' }, name: 'nmemb', attributes: {} },
+             { type: { name: 'FILE', pointer: '*' },
+               attributes: { handle: true },
+               name: 'stream' } ] } },
+     { function: 
+        { type: { name: 'int' },
+          name: 'fclose',
+          attributes: { destructor: true },
+          parameters: 
+           [ { type: { name: 'FILE', pointer: '*' },
+               attributes: {},
+               name: 'f' } ] } } ] }

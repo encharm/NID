@@ -3,6 +3,7 @@ var fs = require('fs');
 var path = require('path');
 
 var assert = require('chai').assert;
+var jsYaml = require('js-yaml');
 
 assert.deepEqualIgnoreOrder = function(actual, expected, message) {
   var sortObjectKeys = function(unsortedObject) {
@@ -33,7 +34,7 @@ describe('parser', function() {
     
     it('should parse: ' + file.replace(/_/g/ ' '), function() {
       var parseObject = NID.parse(template);
-      var shouldEqualObject = JSON.parse(shouldEqual);
+      var shouldEqualObject = jsYaml.safeLoad(shouldEqual);
 
       assert.deepEqualIgnoreOrder(parseObject, shouldEqualObject);
     });

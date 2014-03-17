@@ -1,0 +1,16 @@
+
+// MADNESS return function pointer
+//void (*catch_and_return(int abc, char *name_one, char* name_two, int* number))(char* a, char * b, int* c);
+
+
+
+// return void(*)(int)
+//void (*function_name(int a))(char* arg);
+
+void (*function_name(int a))(char* arg);
+
+void (*(*pointer_to_function_name)(int a))(char * arg);
+
+void* normal_function();
+
+void* (*normal_function_ptr)();

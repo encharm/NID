@@ -1,0 +1,8 @@
+{ declarations: 
+   [ { variable: 
+        { type: { name: 'int' },
+          attributes: {},
+          name: 'some_callback',
+          parameters: 
+           [ { type: { name: 'int' }, name: 'a', attributes: {} },
+             { type: { name: 'int' }, name: 'b', attributes: {} } ] } } ] }

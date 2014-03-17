@@ -1,6 +1,6 @@
 {
-  "name": "NID",
-  "version": "0.0.1",
+  "name": "nid-parser",
+  "version": "0.0.2",
   "description": "NID (Native Interface Definition) is a portable C/C++ API description format that parses into JSON format for convenient bindings generation",
   "main": "index.js",
   "scripts": {
@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "mocha": "~1.17.1",
-    "chai": "~1.9.0"
+    "chai": "~1.9.0",
+    "js-yaml": "~3.0.2"
   }
 }

@@ -1,0 +1,20 @@
+{ declarations: 
+   [ { pragma: '#include <math.h>' },
+     { namespace: 
+        { name: 'std',
+          declarations: 
+           [ { function: 
+                { type: { name: 'double' },
+                  name: 'sqrt',
+                  attributes: {},
+                  parameters: [ { type: { name: 'double' }, name: 'x', attributes: {} } ] } },
+             { function: 
+                { type: { name: 'float' },
+                  name: 'sqrtf',
+                  attributes: {},
+                  parameters: [ { type: { name: 'float' }, name: 'x', attributes: {} } ] } },
+             { function: 
+                { type: { name: 'double long' },
+                  name: 'sqrtl',
+                  attributes: {},
+                  parameters: [ { type: { name: 'double long' }, name: 'x', attributes: {} } ] } } ] } } ] }

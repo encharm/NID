@@ -1,0 +1,20 @@
+{ declarations: 
+   [ { class: 
+        { name: 'Rect',
+          declarations: 
+           [ { function: 
+                { type: { name: 'int' },
+                  name: 'x',
+                  attributes: {},
+                  parameters: 
+                   [ { type: { name: 'int' }, name: 'a', attributes: {} },
+                     { type: { name: 'int' }, name: 'b', attributes: {} } ] } },
+             { function: 
+                { type: { name: 'Rect', pointer: '*' },
+                  attributes: {},
+                  name: 'create',
+                  parameters: 
+                   [ { type: { name: 'int' }, name: 'x', attributes: {} },
+                     { type: { name: 'int' }, name: 'y', attributes: {} },
+                     { type: { name: 'int' }, name: 'w', attributes: {} },
+                     { type: { name: 'int' }, name: 'h', attributes: {} } ] } } ] } } ] }
