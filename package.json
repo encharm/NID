@@ -1,6 +1,6 @@
 {
   "name": "nid-parser",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "NID (Native Interface Definition) is a portable C/C++ API description format that parses into JSON format for convenient bindings generation",
   "main": "index.js",
   "scripts": {

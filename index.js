@@ -22,6 +22,9 @@ try {
 module.exports = {
   parse: function(input, options) {
     options = options || {};
+    global.forNidParser = {
+      typeString: require('./typeString')
+    };
     var out = parser.parse(prepareForParse(input));
     if(options.includeComments)
       out.comments = comments;

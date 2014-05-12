@@ -14,7 +14,7 @@
   }
   var enumeratorValue = 0;
   var path = require('path');
-  var typeString = require(path.join(__dirname, '../../../typeString'));
+  var typeString = global.forNidParser.typeString;
 
   function fixParameter(parameter) {
     if(parameter.parameters) {
