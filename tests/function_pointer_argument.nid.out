@@ -5,10 +5,14 @@
           attributes: {},
           parameters: 
            [ { type: 
-                { name: 'int',
+                { name: 'int(*)(int,int)',
                   parameters: 
                    [ { type: { name: 'int' }, name: 'a', attributes: {} },
                      { type: { name: 'int' }, name: 'b', attributes: {} } ],
-                  functionPointer: true },
+                  type: {
+                    name: 'int'
+                  }
+                },
                attributes: {},
-               name: 'callback' } ] } } ] }
+               name: 'callback',
+               functionPointer: true } ] } } ] }

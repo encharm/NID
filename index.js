@@ -26,5 +26,6 @@ module.exports = {
     if(options.includeComments)
       out.comments = comments;
     return out;
-  }
+  },
+  typeString: require('./typeString')
 };

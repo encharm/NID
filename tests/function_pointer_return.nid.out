@@ -1,11 +1,14 @@
 { declarations: 
    [ { function: 
         { type: 
-           { name: 'void',
+           { name: 'void(*)(char*)',
              parameters: 
               [ { type: { name: 'char', pointer: '*' },
                   attributes: {},
                   name: 'arg' } ],
+             type: {
+               name: 'void'
+             },
              attributes: {},
              functionPointer: true },
           attributes: {},
@@ -13,16 +16,20 @@
           parameters: [ { type: { name: 'int' }, name: 'a', attributes: {} } ] } },
      { variable: 
         { type: 
-           { name: 'void',
+           { name: 'void(*)(char*)',
              parameters: 
               [ { type: { name: 'char', pointer: '*' },
                   attributes: {},
                   name: 'arg' } ],
+             type: {
+               name: 'void'
+             },
              attributes: {},
              functionPointer: true },
           attributes: {},
           name: 'pointer_to_function_name',
-          parameters: [ { type: { name: 'int' }, name: 'a', attributes: {} } ] } },
+          parameters: [ { type: { name: 'int' }, name: 'a', attributes: {} } ],
+          functionPointer: true } },
      { function: 
         { type: { name: 'void', pointer: '*' },
           attributes: {},
@@ -32,4 +39,5 @@
         { type: { name: 'void', pointer: '*' },
           attributes: {},
           name: 'normal_function_ptr',
-          parameters: [] } } ] }
+          parameters: [],
+          functionPointer: true } } ] }

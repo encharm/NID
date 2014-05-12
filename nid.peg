@@ -13,6 +13,8 @@
     }
   }
   var enumeratorValue = 0;
+  var path = require('path');
+  var typeString = require(path.join(__dirname, '../../../typeString'));
 
   function fixParameter(parameter) {
     if(parameter.parameters) {
@@ -23,7 +25,11 @@
 
       // FIXME: remove this?
 
-      parameter.type.functionPointer = true;
+      parameter.functionPointer = true;
+      parameter.type.type = {name: parameter.type.name};
+      parameter.type.name = typeString(parameter.type, {
+        forceParams: true
+      });
     }
     delete parameter.ptrHint;
   }
@@ -158,6 +164,10 @@ type_declaration =
                   }
                   if(type.type.parameters) {
                      type.type.functionPointer = true;
+                     type.type.type = {
+                      name: type.type.name
+                     };
+                     type.type.name = typeString(type.type);
                   }
                   return type;
                 };
@@ -174,6 +184,8 @@ function_declaration =  attributes:attribute_specifier_seq? _ type_declaration:t
   }
   else {
     delete type_declaration.ptrHint; // do not bloat the output
+    if(type_declaration.parameters)
+      type_declaration.functionPointer = true;
     return {
       variable: extend(true, type_declaration, {attributes: attributes})
     }
