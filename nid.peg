@@ -291,7 +291,7 @@ literal_operator_id = 'operator' _ '""' _ identifier
 
 abstract_declarator= // todo
 
-type_id = type:type_specifier+ abstract_declarator? {
+type_id = (type:type_specifier __)+ abstract_declarator? {
   return type.join(" ");
 }
 
@@ -446,21 +446,7 @@ decl_specifier = storage_class_specifier /
                  'typedef' /
                  'constexpr'
 
-simple_type_specifier = 'char' /
-                        'char16_t' /
-                        'char32_t' /
-                        'wchar_t' /
-                        'bool' /
-                        'short' /
-                        'int' /
-                        'long' /
-                        'signed' /
-                        'unsigned' /
-                        'float' /
-                        'double' /
-                        'void' /
-                        'auto' /
-                    front:'::'? _ nested:nested_name_specifier? _ type:type_name {return (front ? front : '') + nested + type;}
+simple_type_specifier =  front:'::'? _ nested:nested_name_specifier? _ type:type_name {return (front ? front : '') + nested + type;}
                         
 // below should allow constant_expression
 
@@ -486,7 +472,7 @@ class_name = identifier
 type_name = simple_template_id /
             class_name /
             enum_name /
-            typedef_name            
+            typedef_name
 
 nested_name_specifier = parts:(part:(type_name / namespace_name) _ '::' {return part + '::';})* {return parts.join("");}
                         
