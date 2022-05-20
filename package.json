@@ -29,8 +29,8 @@
   "homepage": "https://github.com/CodeCharmLtd/NID",
   "dependencies": {
     "extend": "^1.2.1",
-    "optimist": "^0.6.1",
-    "pegjs": "~0.8.0"
+    "pegjs": "~0.8.0",
+    "yargs": "^17.5.1"
   },
   "devDependencies": {
     "chai": "^1.9.1",
