@@ -6,6 +6,6 @@ double sqrt(double x);
 
 float sqrtf(float x);
 
-long double sqrtl(long double x);
+double long sqrtl(double long x);
 
 }

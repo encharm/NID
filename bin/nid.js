@@ -2,14 +2,14 @@
 
 var fs = require('fs');
 var NID = require('../');
-var optimist = require('optimist')
+var yargs = require('yargs/yargs')(process.argv.slice(2))
   .usage('Usage: $0 [inputFile]')
   .alias('h', 'help')
   .alias('o', 'output')
   .describe('output', 'output file')
   .describe('help', 'print help');
 
-var argv = optimist.argv;
+var argv = yargs.argv;
 
 
 if (argv.help) {
