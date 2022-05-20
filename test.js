@@ -31,14 +31,14 @@ describe('parser', function() {
     var template = fs.readFileSync(inFile).toString('utf8');
 
     var shouldEqual = fs.readFileSync(inFile+'.out').toString('utf8');
-    
+
     it('should parse: ' + file.replace(/_/g/ ' '), function() {
       var parseObject = NID.parse(template);
       var shouldEqualObject = jsYaml.safeLoad(shouldEqual);
 
       assert.deepEqualIgnoreOrder(parseObject, shouldEqualObject);
     });
-    
+
   });
 });
 
