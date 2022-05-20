@@ -28,13 +28,13 @@
   },
   "homepage": "https://github.com/CodeCharmLtd/NID",
   "dependencies": {
-    "extend": "^1.2.1",
+    "extend": "^3.0.2",
     "pegjs": "~0.8.0",
     "yargs": "^17.5.1"
   },
   "devDependencies": {
     "chai": "^1.9.1",
-    "js-yaml": "~3.0.2",
-    "mocha": "~1.17.1"
+    "js-yaml": "^4.1.0",
+    "mocha": "^10.0.0"
   }
 }
